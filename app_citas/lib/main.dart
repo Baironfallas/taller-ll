@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _handleUri(Uri uri) async {
     try {
       final params = Map<String, String>.from(uri.queryParameters);
-      
+
       final fragment = uri.fragment;
       if (fragment.isNotEmpty && fragment.contains('access_token')) {
         final fragmentParams = Uri(query: fragment).queryParameters;

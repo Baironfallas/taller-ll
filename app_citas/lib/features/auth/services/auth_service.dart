@@ -10,10 +10,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    return await _client.auth.signUp(
-      email: email,
-      password: password,
-    );
+    return await _client.auth.signUp(email: email, password: password);
   }
 
   Future<AuthResponse> login({
@@ -35,10 +32,7 @@ class AuthService {
         ? '${Uri.base.origin}/#/reset-password'
         : 'appcitas://reset-password';
 
-    await _client.auth.resetPasswordForEmail(
-      email,
-      redirectTo: redirectTo,
-    );
+    await _client.auth.resetPasswordForEmail(email, redirectTo: redirectTo);
   }
 
   Future<UserResponse> actualizarCredenciales({
@@ -46,10 +40,7 @@ class AuthService {
     String? password,
   }) async {
     return await _client.auth.updateUser(
-      UserAttributes(
-        email: email,
-        password: password,
-      ),
+      UserAttributes(email: email, password: password),
     );
   }
 
