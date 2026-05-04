@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/utils/app_messages.dart';
@@ -12,6 +13,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  static const Color _primaryBlue = Color(0xFF004B87);
+  static const Color _secondaryBlue = Color(0xFF0073B7);
+  static const Color _clinicWhite = Color(0xFFF0F5FA);
+  static const Color _white = Color(0xFFFFFFFF);
+  static const Color _darkText = Color(0xFF333333);
+  static const Color _lightText = Color(0xFF666666);
+  static const Color _borderBlue = Color(0xFFD4E5F0);
+  static const Color _errorRed = Color(0xFFB42318);
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
@@ -24,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty) {
       setState(() {
-        _error = 'Ingresa tu correo para recuperar la contraseña';
+        _error = 'Ingresa tu correo para recuperar la contrasena';
       });
       return;
     }
@@ -36,7 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Te enviamos instrucciones para restablecer tu contraseña.'),
+          content: Text(
+            'Te enviamos instrucciones para restablecer tu contrasena.',
+          ),
         ),
       );
     } on AuthException catch (e) {
@@ -57,8 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return AlertDialog(
           title: const Text('Ayuda de acceso'),
           content: const Text(
-            'Si no puedes entrar, verifica tu correo y contraseña. '
-            'Tambien puedes registrarte con un correo nuevo o usar "Recuperar contraseña".',
+            'Si no puedes entrar, verifica tu correo y contrasena. '
+            'Tambien puedes registrarte con un correo nuevo o usar "Recuperar contrasena".',
           ),
           actions: [
             TextButton(
@@ -139,73 +151,272 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final isMobile = media.size.width < 600;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Registro / Inicio de sesion')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            const SizedBox(height: 8),
-            const Text(
-              'Accede o crea tu cuenta',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Correo',
-                prefixIcon: Icon(Icons.email_outlined),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Contraseña',
-                prefixIcon: Icon(Icons.lock_outline),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(_error!, style: const TextStyle(color: Colors.red)),
-              ),
-            if (_loading)
-              const Center(child: CircularProgressIndicator())
-            else ...[
-              ElevatedButton.icon(
-                onPressed: _login,
-                icon: const Icon(Icons.login),
-                label: const Text('Iniciar sesion'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: _register,
-                icon: const Icon(Icons.person_add_alt_1),
-                label: const Text('Registrarse'),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: _recuperarContrasena,
-                child: const Text('Recuperar contraseña'),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: _mostrarAyuda,
-                child: const Text('Necesitas ayuda?'),
-              ),
-            ),
-          ],
+      backgroundColor: _clinicWhite,
+      appBar: AppBar(
+        title: Text(
+          'Registro / Inicio de sesion',
+          style: GoogleFonts.dmSans(fontWeight: FontWeight.w700),
         ),
+        backgroundColor: _clinicWhite,
+        foregroundColor: _primaryBlue,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 20 : 32,
+              vertical: 24,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: _borderBlue),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _primaryBlue.withValues(alpha: 0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 14),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(isMobile ? 22 : 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _LoginHeader(),
+                      SizedBox(height: isMobile ? 26 : 30),
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        style: GoogleFonts.dmSans(color: _darkText),
+                        decoration: _inputDecoration(
+                          label: 'Correo',
+                          icon: Icons.email_outlined,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        style: GoogleFonts.dmSans(color: _darkText),
+                        decoration: _inputDecoration(
+                          label: 'Contrasena',
+                          icon: Icons.lock_outline,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      if (_error != null) _ErrorBanner(message: _error!),
+                      if (_loading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else ...[
+                        SizedBox(
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: _login,
+                            icon: const Icon(Icons.login_rounded),
+                            label: Text(
+                              'Iniciar sesion',
+                              style: GoogleFonts.dmSans(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _primaryBlue,
+                              foregroundColor: _white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 52,
+                          child: OutlinedButton.icon(
+                            onPressed: _register,
+                            icon: const Icon(Icons.person_add_alt_1_rounded),
+                            label: Text(
+                              'Crear cuenta nueva',
+                              style: GoogleFonts.dmSans(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _primaryBlue,
+                              side: const BorderSide(color: _secondaryBlue),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      const Divider(color: _borderBlue),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          TextButton.icon(
+                            onPressed: _recuperarContrasena,
+                            icon: const Icon(Icons.key_rounded, size: 18),
+                            label: const Text('Recuperar contrasena'),
+                            style: _linkStyle(),
+                          ),
+                          TextButton.icon(
+                            onPressed: _mostrarAyuda,
+                            icon: const Icon(
+                              Icons.help_outline_rounded,
+                              size: 18,
+                            ),
+                            label: const Text('Necesitas ayuda?'),
+                            style: _linkStyle(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String label,
+    required IconData icon,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.dmSans(color: _lightText),
+      prefixIcon: Icon(icon, color: _secondaryBlue),
+      filled: true,
+      fillColor: _clinicWhite,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: _borderBlue),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: _secondaryBlue, width: 1.5),
+      ),
+    );
+  }
+
+  static ButtonStyle _linkStyle() {
+    return TextButton.styleFrom(
+      foregroundColor: _secondaryBlue,
+      textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w700),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    );
+  }
+}
+
+class _LoginHeader extends StatelessWidget {
+  const _LoginHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    return Column(
+      children: [
+        Container(
+          width: isMobile ? 62 : 70,
+          height: isMobile ? 62 : 70,
+          decoration: BoxDecoration(
+            color: _LoginScreenState._secondaryBlue,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Icon(
+            Icons.calendar_month_rounded,
+            color: _LoginScreenState._white,
+            size: 36,
+          ),
+        ),
+        SizedBox(height: isMobile ? 18 : 22),
+        Text(
+          'Accede o crea tu cuenta',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.playfairDisplay(
+            fontSize: isMobile ? 30 : 34,
+            fontWeight: FontWeight.w700,
+            color: _LoginScreenState._primaryBlue,
+            height: 1.15,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Gestiona tus citas y datos personales con una experiencia simple y segura.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.dmSans(
+            fontSize: isMobile ? 14 : 15,
+            color: _LoginScreenState._lightText,
+            height: 1.45,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  const _ErrorBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _LoginScreenState._errorRed.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: _LoginScreenState._errorRed.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            color: _LoginScreenState._errorRed,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: GoogleFonts.dmSans(
+                color: _LoginScreenState._errorRed,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
