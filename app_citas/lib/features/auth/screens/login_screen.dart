@@ -279,6 +279,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             label: const Text('Recuperar contrasena'),
                             style: _linkStyle(),
                           ),
+                            TextButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/reset-password');
+                              },
+                              icon: const Icon(
+                                Icons.password_rounded,
+                                size: 18,
+                              ),
+                              label: const Text('Cambiar contrasena'),
+                              style: _linkStyle(),
+                            ),
                           TextButton.icon(
                             onPressed: _mostrarAyuda,
                             icon: const Icon(
