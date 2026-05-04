@@ -120,11 +120,7 @@ class _ServicesList extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                service.$1,
-                size: 18,
-                color: WelcomeScreen._secondaryBlue,
-              ),
+              Icon(service.$1, size: 18, color: WelcomeScreen._secondaryBlue),
               const SizedBox(width: 8),
               Text(
                 service.$2,
@@ -171,9 +167,7 @@ class _CtaButton extends StatelessWidget {
           foregroundColor: const WidgetStatePropertyAll(WelcomeScreen._white),
           elevation: const WidgetStatePropertyAll(0),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           overlayColor: WidgetStatePropertyAll(
             Colors.white.withValues(alpha: 0.12),
