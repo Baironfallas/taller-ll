@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/create_cita_screen.dart';
+import 'screens/welcome_screen.dart';
+import 'screens/confirm_cita_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,9 +24,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    final session = supabase.auth.currentSession;
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      initialRoute: session == null ? '/' : '/home',
+      routes: {
+        '/': (context) => const WelcomeScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => HomeScreen(),
+        '/confirmar-cita': (context) => const ConfirmCitaScreen(),
+        '/crear-cita': (context) => const CreateCitaScreen(),
+      },
     );
   }
 }

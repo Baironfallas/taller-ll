@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,12 +29,20 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login exitoso')),
       );
+
+      Navigator.pushReplacementNamed(context, '/home');
+    } on AuthException catch (e) {
+      setState(() {
+        _error = e.message;
+      });
     } catch (e) {
       setState(() {
-        _error = 'Error al iniciar sesión';
+        _error = 'Error inesperado: $e';
       });
     }
 
@@ -57,9 +66,13 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuario registrado')),
       );
+    } on AuthException catch (e) {
+      setState(() {
+        _error = e.message;
+      });
     } catch (e) {
       setState(() {
-        _error = 'Error al registrarse';
+        _error = 'Error inesperado: $e';
       });
     }
 
