@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/supabase/supabase_config.dart';
@@ -30,7 +31,14 @@ class AuthService {
   }
 
   Future<void> recuperarContrasena(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+    final redirectTo = kIsWeb
+        ? '${Uri.base.origin}/#/reset-password'
+        : 'appcitas://reset-password';
+
+    await _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: redirectTo,
+    );
   }
 
   Future<UserResponse> actualizarCredenciales({

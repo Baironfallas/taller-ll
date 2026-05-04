@@ -81,7 +81,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (!mounted) return;
 
       setState(() {
-        _error = 'No se pudo actualizar la contrasena: $e';
+        final message = '$e';
+        if (message.contains('Auth session missing')) {
+          _error = 'El enlace ha expirado. Solicita un correo de recuperacion nuevo.';
+        } else {
+          _error = 'No se pudo actualizar la contrasena: $e';
+        }
       });
     }
 
