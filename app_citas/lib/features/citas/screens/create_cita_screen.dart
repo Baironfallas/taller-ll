@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/utils/app_messages.dart';
 import '../services/cita_service.dart';
 
 class CreateCitaScreen extends StatefulWidget {
@@ -28,7 +30,7 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cita creada')),
+        const SnackBar(content: Text(AppMessages.citaCreated)),
       );
 
       Navigator.pop(context);

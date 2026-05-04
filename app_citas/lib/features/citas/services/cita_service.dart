@@ -1,7 +1,11 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/supabase/supabase_config.dart';
+import '../../../core/utils/app_messages.dart';
+import '../models/cita.dart';
+
 class CitaService {
-  final SupabaseClient _client = Supabase.instance.client;
+  final SupabaseClient _client = SupabaseConfig.client;
 
   Future<void> crearCita({
     required String fecha,
@@ -11,7 +15,7 @@ class CitaService {
     final user = _client.auth.currentUser;
 
     if (user == null) {
-      throw Exception('Usuario no autenticado');
+      throw Exception(AppMessages.unauthenticatedUser);
     }
 
     await _client.from('citas').insert({
@@ -26,7 +30,7 @@ class CitaService {
     final user = _client.auth.currentUser;
 
     if (user == null) {
-      throw Exception('Usuario no autenticado');
+      throw Exception(AppMessages.unauthenticatedUser);
     }
 
     final response = await _client
@@ -38,7 +42,18 @@ class CitaService {
     return List<Map<String, dynamic>>.from(response);
   }
 
+  Future<List<Cita>> obtenerMisCitasModel() async {
+    final rows = await obtenerMisCitas();
+    return rows.map(Cita.fromJson).toList();
+  }
+
   Future<void> eliminarCita(String id) async {
-    await _client.from('citas').delete().eq('id', id);
+    final user = _client.auth.currentUser;
+
+    if (user == null) {
+      throw Exception(AppMessages.unauthenticatedUser);
+    }
+
+    await _client.from('citas').delete().eq('id', id).eq('user_id', user.id);
   }
 }

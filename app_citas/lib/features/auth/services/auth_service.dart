@@ -1,7 +1,9 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/supabase/supabase_config.dart';
+
 class AuthService {
-  final SupabaseClient _client = Supabase.instance.client;
+  final SupabaseClient _client = SupabaseConfig.client;
 
   Future<AuthResponse> register({
     required String email,

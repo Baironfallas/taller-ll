@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/utils/app_messages.dart';
 import '../services/cita_service.dart';
 
 class ConfirmCitaScreen extends StatefulWidget {
@@ -25,7 +27,7 @@ class _ConfirmCitaScreenState extends State<ConfirmCitaScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cita confirmada correctamente')),
+        const SnackBar(content: Text(AppMessages.citaConfirmed)),
       );
 
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);

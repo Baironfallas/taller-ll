@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../core/utils/app_messages.dart';
 import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -32,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login exitoso')),
+        const SnackBar(content: Text(AppMessages.loginSuccess)),
       );
 
       Navigator.pushReplacementNamed(context, '/home');
@@ -64,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuario registrado')),
+        const SnackBar(content: Text(AppMessages.userRegistered)),
       );
     } on AuthException catch (e) {
       setState(() {
