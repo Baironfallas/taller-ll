@@ -53,22 +53,25 @@ class _HeroSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: isMobile ? 64 : 76,
-          height: isMobile ? 64 : 76,
-          decoration: BoxDecoration(
-            color: WelcomeScreen._secondaryBlue,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Icon(
-            Icons.calendar_month_rounded,
-            size: isMobile ? 34 : 40,
-            color: WelcomeScreen._white,
+        Center(
+          child: Container(
+            width: isMobile ? 64 : 76,
+            height: isMobile ? 64 : 76,
+            decoration: BoxDecoration(
+              color: WelcomeScreen._secondaryBlue,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              Icons.calendar_month_rounded,
+              size: isMobile ? 34 : 40,
+              color: WelcomeScreen._white,
+            ),
           ),
         ),
         SizedBox(height: isMobile ? 24 : 30),
         Text(
           'Gestiona tus citas facilmente',
+          textAlign: TextAlign.center,
           style: GoogleFonts.playfairDisplay(
             fontSize: isMobile ? 34 : 42,
             fontWeight: FontWeight.w700,
