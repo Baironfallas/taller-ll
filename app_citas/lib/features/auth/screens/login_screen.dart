@@ -97,9 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppMessages.loginSuccess)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(AppMessages.loginSuccess)));
 
       Navigator.pushReplacementNamed(context, '/home');
     } on AuthException catch (e) {
@@ -131,9 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppMessages.userRegistered)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(AppMessages.userRegistered)));
     } on AuthException catch (e) {
       setState(() {
         _error = e.message;
@@ -279,17 +279,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             label: const Text('Recuperar contrasena'),
                             style: _linkStyle(),
                           ),
-                            TextButton.icon(
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/reset-password');
-                              },
-                              icon: const Icon(
-                                Icons.password_rounded,
-                                size: 18,
-                              ),
-                              label: const Text('Cambiar contrasena'),
-                              style: _linkStyle(),
-                            ),
+                          TextButton.icon(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/reset-password');
+                            },
+                            icon: const Icon(Icons.password_rounded, size: 18),
+                            label: const Text('Cambiar contrasena'),
+                            style: _linkStyle(),
+                          ),
                           TextButton.icon(
                             onPressed: _mostrarAyuda,
                             icon: const Icon(
