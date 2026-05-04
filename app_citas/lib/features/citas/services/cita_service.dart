@@ -11,6 +11,8 @@ class CitaService {
     required String fecha,
     required String hora,
     required String motivo,
+    String? profesionalId,
+    String? servicioId,
   }) async {
     final user = _client.auth.currentUser;
 
@@ -18,12 +20,18 @@ class CitaService {
       throw Exception(AppMessages.unauthenticatedUser);
     }
 
-    await _client.from('citas').insert({
+    final payload = <String, dynamic>{
       'user_id': user.id,
       'fecha': fecha,
       'hora': hora,
       'motivo': motivo,
-    });
+      if (profesionalId != null && profesionalId.isNotEmpty)
+        'profesional_id': profesionalId,
+      if (servicioId != null && servicioId.isNotEmpty) 'servicio_id': servicioId,
+      'estado': 'pendiente',
+    };
+
+    await _client.from('citas').insert(payload);
   }
 
   Future<List<Map<String, dynamic>>> obtenerMisCitas() async {
@@ -37,7 +45,8 @@ class CitaService {
         .from('citas')
         .select()
         .eq('user_id', user.id)
-        .order('fecha', ascending: true);
+      .order('fecha', ascending: true)
+      .order('hora', ascending: true);
 
     return List<Map<String, dynamic>>.from(response);
   }
@@ -55,5 +64,37 @@ class CitaService {
     }
 
     await _client.from('citas').delete().eq('id', id).eq('user_id', user.id);
+  }
+
+  Future<void> actualizarCita({
+    required String id,
+    required String fecha,
+    required String hora,
+    required String motivo,
+    String? profesionalId,
+    String? servicioId,
+    String? estado,
+  }) async {
+    final user = _client.auth.currentUser;
+
+    if (user == null) {
+      throw Exception(AppMessages.unauthenticatedUser);
+    }
+
+    final payload = <String, dynamic>{
+      'fecha': fecha,
+      'hora': hora,
+      'motivo': motivo,
+      if (profesionalId != null && profesionalId.isNotEmpty)
+        'profesional_id': profesionalId,
+      if (servicioId != null && servicioId.isNotEmpty) 'servicio_id': servicioId,
+      if (estado != null && estado.isNotEmpty) 'estado': estado,
+    };
+
+    await _client
+        .from('citas')
+        .update(payload)
+        .eq('id', id)
+        .eq('user_id', user.id);
   }
 }

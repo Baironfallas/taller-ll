@@ -19,6 +19,58 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   String? _error;
 
+  Future<void> _recuperarContrasena() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      setState(() {
+        _error = 'Ingresa tu correo para recuperar la contraseña';
+      });
+      return;
+    }
+
+    try {
+      await _authService.recuperarContrasena(email);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Te enviamos instrucciones para restablecer tu contraseña.'),
+        ),
+      );
+    } on AuthException catch (e) {
+      setState(() {
+        _error = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error inesperado: $e';
+      });
+    }
+  }
+
+  void _mostrarAyuda() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Ayuda de acceso'),
+          content: const Text(
+            'Si no puedes entrar, verifica tu correo y contraseña. '
+            'Tambien puedes registrarte con un correo nuevo o usar "Recuperar contraseña".',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _login() async {
     setState(() {
       _loading = true;
@@ -65,6 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text(AppMessages.userRegistered)),
       );
@@ -86,35 +140,70 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: const Text('Registro / Inicio de sesion')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: ListView(
           children: [
+            const SizedBox(height: 8),
+            const Text(
+              'Accede o crea tu cuenta',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Correo'),
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: 'Correo',
+                prefixIcon: Icon(Icons.email_outlined),
+              ),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Contraseña'),
+              decoration: const InputDecoration(
+                labelText: 'Contraseña',
+                prefixIcon: Icon(Icons.lock_outline),
+              ),
             ),
             const SizedBox(height: 20),
             if (_error != null)
-              Text(_error!, style: const TextStyle(color: Colors.red)),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(_error!, style: const TextStyle(color: Colors.red)),
+              ),
             if (_loading)
-              const CircularProgressIndicator()
+              const Center(child: CircularProgressIndicator())
             else ...[
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: _login,
-                child: const Text('Iniciar sesión'),
+                icon: const Icon(Icons.login),
+                label: const Text('Iniciar sesion'),
               ),
-              ElevatedButton(
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
                 onPressed: _register,
-                child: const Text('Registrarse'),
+                icon: const Icon(Icons.person_add_alt_1),
+                label: const Text('Registrarse'),
               ),
-            ]
+            ],
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: _recuperarContrasena,
+                child: const Text('Recuperar contraseña'),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: _mostrarAyuda,
+                child: const Text('Necesitas ayuda?'),
+              ),
+            ),
           ],
         ),
       ),
