@@ -1,58 +1,56 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../core/supabase/supabase_config.dart';
 import '../../../core/utils/app_messages.dart';
+import '../../../models/notification_preference_model.dart';
+import '../../../services/notification_preference_service.dart';
+import '../../../services/notification_service.dart';
+import '../../../services/session_service.dart';
 import '../models/notificacion.dart';
 
 class NotificacionService {
-  final SupabaseClient _client = SupabaseConfig.client;
+  final NotificationService _notificationService = NotificationService();
+  final NotificationPreferenceService _preferenceService =
+      NotificationPreferenceService();
+  final SessionService _sessionService = SessionService.instance;
 
-  String _prefsKey(String suffix) {
-    final userId = _client.auth.currentUser?.id ?? 'anon';
-    return 'noti_pref_${userId}_$suffix';
-  }
-
-  Future<List<Notificacion>> obtenerMisNotificaciones() async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
+  int get _currentUserId {
+    final userId = _sessionService.currentUserId;
+    if (userId == null) {
       throw Exception(AppMessages.unauthenticatedUser);
     }
+    return userId;
+  }
 
-    final response = await _client
-        .from('notificaciones')
-        .select()
-        .eq('user_id', user.id)
-        .order('created_at', ascending: false);
+  NotificationPreferenceModel? _preference;
 
-    return List<Map<String, dynamic>>.from(response)
-        .map(Notificacion.fromJson)
+  Future<List<Notificacion>> obtenerMisNotificaciones() async {
+    final notifications = await _notificationService.getNotificationsByUser(
+      _currentUserId,
+    );
+    return notifications
+        .map((notification) => Notificacion.fromJson(notification.toJson()))
         .toList();
   }
 
   Future<void> marcarComoLeida(String id) async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception(AppMessages.unauthenticatedUser);
-    }
-
-    await _client
-        .from('notificaciones')
-        .update({'leida': true})
-        .eq('id', id)
-        .eq('user_id', user.id);
+    final notificationId = int.tryParse(id);
+    if (notificationId == null) throw Exception('Id de notificacion invalido.');
+    await _notificationService.markAsRead(notificationId);
   }
 
   Future<Map<String, dynamic>> obtenerPreferencias() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      _preference = await _preferenceService.getPreferenceByUser(
+        _currentUserId,
+      );
+    } catch (_) {
+      _preference = null;
+    }
 
+    final preference = _preference;
     return {
-      'email': prefs.getBool(_prefsKey('email')) ?? true,
-      'sms': prefs.getBool(_prefsKey('sms')) ?? false,
-      'push': prefs.getBool(_prefsKey('push')) ?? true,
-      'recordatorioMinutos': prefs.getInt(_prefsKey('recordatorio_minutos')) ?? 60,
+      'email': preference?.emailEnabled ?? true,
+      'sms': preference?.smsEnabled ?? false,
+      'push': preference?.pushEnabled ?? true,
+      'recordatorioMinutos': preference?.reminderMinutesBefore ?? 60,
     };
   }
 
@@ -62,11 +60,25 @@ class NotificacionService {
     required bool push,
     required int recordatorioMinutos,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    final preference = _preference;
 
-    await prefs.setBool(_prefsKey('email'), email);
-    await prefs.setBool(_prefsKey('sms'), sms);
-    await prefs.setBool(_prefsKey('push'), push);
-    await prefs.setInt(_prefsKey('recordatorio_minutos'), recordatorioMinutos);
+    if (preference == null || preference.id == 0) {
+      _preference = await _preferenceService.createPreference(
+        userId: _currentUserId,
+        emailEnabled: email,
+        smsEnabled: sms,
+        pushEnabled: push,
+        reminderMinutesBefore: recordatorioMinutos,
+      );
+      return;
+    }
+
+    _preference = await _preferenceService.updatePreference(
+      id: preference.id,
+      emailEnabled: email,
+      smsEnabled: sms,
+      pushEnabled: push,
+      reminderMinutesBefore: recordatorioMinutos,
+    );
   }
 }

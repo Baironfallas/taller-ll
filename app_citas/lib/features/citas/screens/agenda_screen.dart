@@ -25,7 +25,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     return citas.where((cita) {
       final estado = (cita['estado'] ?? 'pendiente').toString().toLowerCase();
-      final coincideEstado = _estadoFiltro == 'todos' || estado == _estadoFiltro;
+      final coincideEstado =
+          _estadoFiltro == 'todos' || estado == _estadoFiltro;
 
       final texto = [
         cita['fecha']?.toString() ?? '',
@@ -40,28 +41,20 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   Future<void> _marcarCancelada(Map<String, dynamic> cita) async {
-    await _citaService.actualizarCita(
-      id: cita['id'].toString(),
-      fecha: cita['fecha'].toString(),
-      hora: cita['hora'].toString(),
-      motivo: cita['motivo']?.toString() ?? '',
-      profesionalId: cita['profesional_id']?.toString(),
-      servicioId: cita['servicio_id']?.toString(),
-      estado: 'cancelada',
-    );
+    await _citaService.cancelarCita(cita['id'].toString());
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cita cancelada')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Cita cancelada')));
 
     setState(() {});
   }
 
   Future<void> _mostrarEditor(Map<String, dynamic> cita) async {
-    DateTime fecha = DateTime.tryParse(cita['fecha']?.toString() ?? '') ??
-        DateTime.now();
+    DateTime fecha =
+        DateTime.tryParse(cita['fecha']?.toString() ?? '') ?? DateTime.now();
     TimeOfDay hora = _parseHora(cita['hora']?.toString()) ?? TimeOfDay.now();
     final motivoController = TextEditingController(
       text: cita['motivo']?.toString() ?? '',
@@ -141,7 +134,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
     await _citaService.actualizarCita(
       id: cita['id'].toString(),
       fecha: _formatFecha(fecha),
-      hora: _horaSupabase(hora),
+      hora: _formatHora(hora),
       motivo: motivoController.text.trim(),
       profesionalId: cita['profesional_id']?.toString(),
       servicioId: cita['servicio_id']?.toString(),
@@ -150,9 +143,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Cita actualizada')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Cita actualizada')));
 
     setState(() {});
   }
@@ -180,10 +173,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
-  }
-
-  String _horaSupabase(TimeOfDay time) {
-    return '${_formatHora(time)}:00';
   }
 
   @override
@@ -227,9 +216,18 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   ),
                   items: const [
                     DropdownMenuItem(value: 'todos', child: Text('Todos')),
-                    DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
-                    DropdownMenuItem(value: 'confirmada', child: Text('Confirmada')),
-                    DropdownMenuItem(value: 'cancelada', child: Text('Cancelada')),
+                    DropdownMenuItem(
+                      value: 'pendiente',
+                      child: Text('Pendiente'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'confirmada',
+                      child: Text('Confirmada'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'cancelada',
+                      child: Text('Cancelada'),
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -288,7 +286,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
                                   ),
                                   Chip(
                                     label: Text(
-                                      (cita['estado'] ?? 'pendiente').toString(),
+                                      (cita['estado'] ?? 'pendiente')
+                                          .toString(),
                                     ),
                                   ),
                                 ],
@@ -313,13 +312,15 @@ class _AgendaScreenState extends State<AgendaScreen> {
                                   IconButton(
                                     tooltip: 'Eliminar',
                                     onPressed: () async {
-                                      await _citaService
-                                          .eliminarCita(cita['id'].toString());
+                                      await _citaService.eliminarCita(
+                                        cita['id'].toString(),
+                                      );
 
                                       if (!mounted) return;
 
-                                      ScaffoldMessenger.of(this.context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        this.context,
+                                      ).showSnackBar(
                                         const SnackBar(
                                           content: Text('Cita eliminada'),
                                         ),
@@ -327,7 +328,10 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
                                       setState(() {});
                                     },
-                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
                                   ),
                                 ],
                               ),

@@ -1,46 +1,53 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../../core/supabase/supabase_config.dart';
 import '../../../core/utils/app_messages.dart';
+import '../../../services/auth_service.dart';
+import '../../../services/session_service.dart';
+import '../../../services/user_service.dart';
 import '../models/profile.dart';
 
 class ProfileService {
-  final SupabaseClient _client = SupabaseConfig.client;
+  final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
+  final SessionService _sessionService = SessionService.instance;
 
   Future<Profile?> obtenerMiPerfil() async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception(AppMessages.unauthenticatedUser);
-    }
-
-    final response = await _client
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
-
-    if (response == null) return null;
-
-    return Profile.fromJson(response);
+    final user = await _authService.getMe();
+    return Profile.fromJson(user.toJson());
   }
 
   Future<void> actualizarMiPerfil({
     String? nombre,
+    String? apellido,
+    String? email,
     String? telefono,
   }) async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
+    final userId = _sessionService.currentUserId;
+    if (userId == null) {
       throw Exception(AppMessages.unauthenticatedUser);
     }
 
-    await _client.from('profiles').upsert({
-      'id': user.id,
-      'email': user.email,
-      'nombre': nombre,
-      'telefono': telefono,
-      'updated_at': DateTime.now().toIso8601String(),
-    });
+    final updated = await _userService.updateProfile(
+      id: userId,
+      nombre: nombre,
+      apellido: apellido,
+      email: email,
+      telefono: telefono,
+    );
+    _sessionService.setUser(updated);
+  }
+
+  Future<void> cambiarContrasena({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final userId = _sessionService.currentUserId;
+    if (userId == null) {
+      throw Exception(AppMessages.unauthenticatedUser);
+    }
+
+    await _userService.changePassword(
+      id: userId,
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+    );
   }
 }

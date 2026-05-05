@@ -1,11 +1,19 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../../../core/supabase/supabase_config.dart';
 import '../../../core/utils/app_messages.dart';
+import '../../../services/appointment_service.dart';
+import '../../../services/session_service.dart';
 import '../models/cita.dart';
 
 class CitaService {
-  final SupabaseClient _client = SupabaseConfig.client;
+  final AppointmentService _appointmentService = AppointmentService();
+  final SessionService _sessionService = SessionService.instance;
+
+  int get _currentUserId {
+    final userId = _sessionService.currentUserId;
+    if (userId == null) {
+      throw Exception(AppMessages.unauthenticatedUser);
+    }
+    return userId;
+  }
 
   Future<void> crearCita({
     required String fecha,
@@ -13,42 +21,32 @@ class CitaService {
     required String motivo,
     String? profesionalId,
     String? servicioId,
+    String? detalles,
+    String? ubicacion,
+    String? instrucciones,
   }) async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception(AppMessages.unauthenticatedUser);
+    final professionalId = int.tryParse(profesionalId ?? '');
+    if (professionalId == null) {
+      throw Exception('Selecciona un profesional valido.');
     }
 
-    final payload = <String, dynamic>{
-      'user_id': user.id,
-      'fecha': fecha,
-      'hora': hora,
-      'motivo': motivo,
-      if (profesionalId != null && profesionalId.isNotEmpty)
-        'profesional_id': profesionalId,
-      if (servicioId != null && servicioId.isNotEmpty) 'servicio_id': servicioId,
-      'estado': 'pendiente',
-    };
-
-    await _client.from('citas').insert(payload);
+    await _appointmentService.createAppointment(
+      userId: _currentUserId,
+      professionalId: professionalId,
+      fecha: fecha,
+      hora: _normalizeHora(hora),
+      motivo: motivo,
+      detalles: detalles ?? '',
+      ubicacion: ubicacion ?? '',
+      instrucciones: instrucciones ?? '',
+    );
   }
 
   Future<List<Map<String, dynamic>>> obtenerMisCitas() async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception(AppMessages.unauthenticatedUser);
-    }
-
-    final response = await _client
-        .from('citas')
-        .select()
-        .eq('user_id', user.id)
-      .order('fecha', ascending: true)
-      .order('hora', ascending: true);
-
-    return List<Map<String, dynamic>>.from(response);
+    final citas = await _appointmentService.getAppointmentsByUser(
+      _currentUserId,
+    );
+    return citas.map((cita) => cita.toLegacyMap()).toList();
   }
 
   Future<List<Cita>> obtenerMisCitasModel() async {
@@ -57,13 +55,9 @@ class CitaService {
   }
 
   Future<void> eliminarCita(String id) async {
-    final user = _client.auth.currentUser;
-
-    if (user == null) {
-      throw Exception(AppMessages.unauthenticatedUser);
-    }
-
-    await _client.from('citas').delete().eq('id', id).eq('user_id', user.id);
+    final citaId = int.tryParse(id);
+    if (citaId == null) throw Exception('Id de cita invalido.');
+    await _appointmentService.deleteAppointment(citaId);
   }
 
   Future<void> actualizarCita({
@@ -74,27 +68,43 @@ class CitaService {
     String? profesionalId,
     String? servicioId,
     String? estado,
+    String? detalles,
+    String? ubicacion,
+    String? instrucciones,
   }) async {
-    final user = _client.auth.currentUser;
+    final citaId = int.tryParse(id);
+    if (citaId == null) throw Exception('Id de cita invalido.');
 
-    if (user == null) {
-      throw Exception(AppMessages.unauthenticatedUser);
+    await _appointmentService.updateAppointment(
+      id: citaId,
+      fecha: fecha,
+      hora: _normalizeHora(hora),
+      motivo: motivo,
+      professionalId: int.tryParse(profesionalId ?? ''),
+      estado: estado,
+      detalles: detalles,
+      ubicacion: ubicacion,
+      instrucciones: instrucciones,
+    );
+  }
+
+  Future<void> confirmarCita(String id) async {
+    final citaId = int.tryParse(id);
+    if (citaId == null) throw Exception('Id de cita invalido.');
+    await _appointmentService.confirmAppointment(citaId);
+  }
+
+  Future<void> cancelarCita(String id) async {
+    final citaId = int.tryParse(id);
+    if (citaId == null) throw Exception('Id de cita invalido.');
+    await _appointmentService.cancelAppointment(citaId);
+  }
+
+  String _normalizeHora(String value) {
+    final parts = value.split(':');
+    if (parts.length >= 2) {
+      return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
     }
-
-    final payload = <String, dynamic>{
-      'fecha': fecha,
-      'hora': hora,
-      'motivo': motivo,
-      if (profesionalId != null && profesionalId.isNotEmpty)
-        'profesional_id': profesionalId,
-      if (servicioId != null && servicioId.isNotEmpty) 'servicio_id': servicioId,
-      if (estado != null && estado.isNotEmpty) 'estado': estado,
-    };
-
-    await _client
-        .from('citas')
-        .update(payload)
-        .eq('id', id)
-        .eq('user_id', user.id);
+    return value;
   }
 }

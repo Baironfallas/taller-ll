@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/app_messages.dart';
-import '../../auth/services/auth_service.dart';
 import '../models/profile.dart';
 import '../services/profile_service.dart';
 
@@ -14,11 +13,12 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileService _profileService = ProfileService();
-  final AuthService _authService = AuthService();
 
   final _nombreController = TextEditingController();
+  final _apellidoController = TextEditingController();
   final _telefonoController = TextEditingController();
   final _emailController = TextEditingController();
+  final _currentPasswordController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _guardando = false;
@@ -34,26 +34,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _profileService.actualizarMiPerfil(
         nombre: _nombreController.text.trim(),
+        apellido: _apellidoController.text.trim(),
+        email: _emailController.text.trim(),
         telefono: _telefonoController.text.trim(),
       );
 
-      final nuevoEmail = _emailController.text.trim();
+      final contrasenaActual = _currentPasswordController.text.trim();
       final nuevaContrasena = _passwordController.text.trim();
-      final emailActual = _authService.currentUser?.email ?? '';
-
-      if (nuevoEmail.isNotEmpty && nuevoEmail != emailActual) {
-        await _authService.actualizarCredenciales(email: nuevoEmail);
-      }
 
       if (nuevaContrasena.isNotEmpty) {
-        await _authService.actualizarCredenciales(password: nuevaContrasena);
+        if (contrasenaActual.isEmpty) {
+          throw Exception('Ingresa la contrasena actual para cambiarla.');
+        }
+        await _profileService.cambiarContrasena(
+          currentPassword: contrasenaActual,
+          newPassword: nuevaContrasena,
+        );
       }
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppMessages.profileUpdated)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(AppMessages.profileUpdated)));
       setState(() {});
     } catch (e) {
       if (!mounted) return;
@@ -70,8 +73,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _nombreController.dispose();
+    _apellidoController.dispose();
     _telefonoController.dispose();
     _emailController.dispose();
+    _currentPasswordController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -95,8 +100,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           if (!_initialized) {
             _nombreController.text = profile?.nombre ?? '';
+            _apellidoController.text = profile?.apellido ?? '';
             _telefonoController.text = profile?.telefono ?? '';
-            _emailController.text = profile?.email ?? _authService.currentUser?.email ?? '';
+            _emailController.text = profile?.email ?? '';
             _initialized = true;
           }
 
@@ -117,11 +123,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 10),
               TextField(
+                controller: _apellidoController,
+                decoration: const InputDecoration(
+                  labelText: 'Apellido',
+                  prefixIcon: Icon(Icons.badge_outlined),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Correo electronico',
                   prefixIcon: Icon(Icons.email_outlined),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _currentPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Contrasena actual (solo si cambias clave)',
+                  prefixIcon: Icon(Icons.lock_open_outlined),
                 ),
               ),
               const SizedBox(height: 10),
@@ -152,11 +175,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
               const SizedBox(height: 10),
               OutlinedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/notificaciones'),
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/notificaciones'),
                 icon: const Icon(Icons.notifications_outlined),
-                label: const Text(
-                  'Configurar notificaciones y recordatorios',
-                ),
+                label: const Text('Configurar notificaciones y recordatorios'),
               ),
             ],
           );

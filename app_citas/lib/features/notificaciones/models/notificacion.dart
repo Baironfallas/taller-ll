@@ -18,22 +18,24 @@ class Notificacion {
   factory Notificacion.fromJson(Map<String, dynamic> json) {
     return Notificacion(
       id: json['id'].toString(),
-      userId: json['user_id'].toString(),
+      userId: (json['userId'] ?? json['user_id']).toString(),
       titulo: json['titulo']?.toString() ?? '',
       mensaje: json['mensaje']?.toString() ?? '',
       leida: json['leida'] as bool?,
-      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? ''),
+      createdAt: DateTime.tryParse(
+        (json['createdAt'] ?? json['created_at'])?.toString() ?? '',
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'user_id': userId,
+      'userId': userId,
       'titulo': titulo,
       'mensaje': mensaje,
       'leida': leida,
-      'created_at': createdAt?.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
     };
   }
 }

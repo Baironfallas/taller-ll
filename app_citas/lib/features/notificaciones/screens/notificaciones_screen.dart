@@ -57,9 +57,9 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
 
     setState(() => _guardandoPreferencias = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(AppMessages.preferencesSaved)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text(AppMessages.preferencesSaved)));
   }
 
   @override
