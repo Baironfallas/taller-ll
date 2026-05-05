@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from '../../appointments/entities/appointment.entity';
+import { ProfessionalSchedule } from '../../professional-schedules/entities/professional-schedule.entity';
 
 @Entity('professionals')
 export class Professional {
@@ -42,4 +43,7 @@ export class Professional {
 
   @OneToMany(() => Appointment, (appointment) => appointment.professional)
   appointments: Appointment[];
+
+  @OneToMany(() => ProfessionalSchedule, (schedule) => schedule.professional)
+  schedules: ProfessionalSchedule[];
 }
