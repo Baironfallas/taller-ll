@@ -1,15 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:uni_links/uni_links.dart';
 
 import 'app/routes/app_routes.dart';
-import 'core/supabase/supabase_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await SupabaseConfig.initialize();
 
   runApp(const MyApp());
 }
@@ -42,16 +40,19 @@ class _MyAppState extends State<MyApp> {
       // Ignora enlaces iniciales inválidos.
     }
 
-    _uriSubscription = uriLinkStream.listen(
-      (Uri? uri) {
-        if (uri != null) {
-          _handleUri(uri);
-        }
-      },
-      onError: (_) {
-        // Ignora errores del stream de enlaces.
-      },
-    );
+    // uriLinkStream no está soportado en web
+    if (!kIsWeb) {
+      _uriSubscription = uriLinkStream.listen(
+        (Uri? uri) {
+          if (uri != null) {
+            _handleUri(uri);
+          }
+        },
+        onError: (_) {
+          // Ignora errores del stream de enlaces.
+        },
+      );
+    }
 
     if (Uri.base.fragment.contains('reset-password')) {
       await _handleUri(Uri.base);
@@ -68,23 +69,9 @@ class _MyAppState extends State<MyApp> {
         params.addAll(fragmentParams);
       }
 
-      final accessToken = params['access_token'];
-      final refreshToken = params['refresh_token'];
-
-      if (accessToken != null &&
-          accessToken.isNotEmpty &&
-          refreshToken != null &&
-          refreshToken.isNotEmpty) {
-        await SupabaseConfig.client.auth.setSession(
-          refreshToken,
-          accessToken: accessToken,
-        );
-      }
-
       if (uri.host == 'reset-password' ||
           uri.path.contains('reset-password') ||
-          uri.fragment.contains('reset-password') ||
-          (accessToken != null && refreshToken != null)) {
+          uri.fragment.contains('reset-password')) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _navigatorKey.currentState?.pushNamed(AppRoutes.resetPassword);
         });

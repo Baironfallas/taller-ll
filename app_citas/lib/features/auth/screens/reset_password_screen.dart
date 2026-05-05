@@ -22,6 +22,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _emailController = TextEditingController();
   final AuthService _authService = AuthService();
 
   bool _loading = false;
@@ -31,16 +32,18 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   void dispose() {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
   Future<void> _guardarNuevaContrasena() async {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
+    final email = _emailController.text.trim();
 
-    if (password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       setState(() {
-        _error = 'Completa los dos campos para continuar';
+        _error = 'Completa el correo y los dos campos de contrasena';
       });
       return;
     }
@@ -65,7 +68,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     });
 
     try {
-      await _authService.actualizarCredenciales(password: password);
+      await _authService.resetPassword(email: email, newPassword: password);
       await _authService.logout();
 
       if (!mounted) return;
@@ -81,13 +84,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (!mounted) return;
 
       setState(() {
-        final message = '$e';
-        if (message.contains('Auth session missing')) {
-          _error =
-              'El enlace ha expirado. Solicita un correo de recuperacion nuevo.';
-        } else {
-          _error = 'No se pudo actualizar la contrasena: $e';
-        }
+        _error = 'No se pudo actualizar la contrasena: $e';
       });
     }
 
@@ -177,6 +174,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                       ),
                       const SizedBox(height: 26),
+                      TextField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        style: GoogleFonts.dmSans(color: _darkText),
+                        decoration: _inputDecoration(
+                          label: 'Correo electronico',
+                          icon: Icons.email_outlined,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
                       TextField(
                         controller: _passwordController,
                         obscureText: true,

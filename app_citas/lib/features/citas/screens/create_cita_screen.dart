@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../profesionales/models/profesional.dart';
-import '../../profesionales/services/horario_profesional_service.dart';
 import '../../profesionales/services/profesional_service.dart';
 
 class CreateCitaScreen extends StatefulWidget {
@@ -16,7 +15,6 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
   final _detallesController = TextEditingController();
 
   final ProfesionalService _profesionalService = ProfesionalService();
-  final HorarioProfesionalService _horarioService = HorarioProfesionalService();
 
   DateTime _fechaSeleccionada = DateTime.now();
   TimeOfDay _horaSeleccionada = const TimeOfDay(hour: 9, minute: 0);
@@ -36,29 +34,20 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
     try {
       setState(() => _loadingProfesionales = true);
 
-      final profesionales = await _profesionalService.obtenerProfesionales();
-      final diaSemana = _fechaSeleccionada.weekday % 7;
-      final disponibles = <Profesional>[];
-
-      for (final profesional in profesionales) {
-        final horarios = await _horarioService
-            .obtenerHorariosPorProfesional(profesional.id);
-        final tieneHorario = horarios.any(
-          (h) => (h.activo ?? true) && h.diaSemana == diaSemana,
-        );
-
-        if (tieneHorario) {
-          disponibles.add(profesional);
-        }
-      }
+      final disponibles = await _profesionalService
+          .obtenerProfesionalesDisponibles(
+            fecha: _formatFecha(_fechaSeleccionada),
+            hora: _formatHora(_horaSeleccionada),
+          );
 
       if (!mounted) return;
 
       setState(() {
         _profesionalesDisponibles = disponibles;
         if (_profesionalSeleccionado != null &&
-            !_profesionalesDisponibles
-                .any((p) => p.id == _profesionalSeleccionado!.id)) {
+            !_profesionalesDisponibles.any(
+              (p) => p.id == _profesionalSeleccionado!.id,
+            )) {
           _profesionalSeleccionado = null;
         }
       });
@@ -84,7 +73,7 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
   String _formatHora(TimeOfDay time) {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute:00';
+    return '$hour:$minute';
   }
 
   Future<void> _continuarAConfirmacion() async {
@@ -115,8 +104,7 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
         'profesionalId': _profesionalSeleccionado!.id,
         'profesionalNombre': _profesionalSeleccionado!.nombre,
         'ubicacion': 'Sede principal, consultorio 203',
-        'instrucciones':
-            'Llegar 10 minutos antes con documento de identidad.',
+        'instrucciones': 'Llegar 10 minutos antes con documento de identidad.',
       },
     );
 
@@ -168,6 +156,7 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
 
               if (seleccion == null) return;
               setState(() => _horaSeleccionada = seleccion);
+              _cargarProfesionalesDisponibles();
             },
           ),
           const SizedBox(height: 12),

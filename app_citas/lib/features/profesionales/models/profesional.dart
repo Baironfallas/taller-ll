@@ -1,3 +1,5 @@
+import '../../../models/professional_model.dart';
+
 class Profesional {
   const Profesional({
     required this.id,
@@ -5,6 +7,10 @@ class Profesional {
     this.profileId,
     this.servicioId,
     this.especialidad,
+    this.apellido,
+    this.email,
+    this.telefono,
+    this.descripcion,
     this.activo,
   });
 
@@ -13,6 +19,10 @@ class Profesional {
   final String? profileId;
   final String? servicioId;
   final String? especialidad;
+  final String? apellido;
+  final String? email;
+  final String? telefono;
+  final String? descripcion;
   final bool? activo;
 
   factory Profesional.fromJson(Map<String, dynamic> json) {
@@ -22,7 +32,26 @@ class Profesional {
       profileId: json['profile_id']?.toString(),
       servicioId: json['servicio_id']?.toString(),
       especialidad: json['especialidad'] as String?,
+      apellido: json['apellido']?.toString(),
+      email: json['email']?.toString(),
+      telefono: json['telefono']?.toString(),
+      descripcion: json['descripcion']?.toString(),
       activo: json['activo'] as bool?,
+    );
+  }
+
+  factory Profesional.fromProfessionalModel(ProfessionalModel model) {
+    return Profesional(
+      id: model.id.toString(),
+      nombre: model.nombreCompleto.isEmpty
+          ? model.nombre
+          : model.nombreCompleto,
+      apellido: model.apellido,
+      especialidad: model.especialidad,
+      email: model.email,
+      telefono: model.telefono,
+      descripcion: model.descripcion,
+      activo: model.activo,
     );
   }
 
@@ -33,6 +62,10 @@ class Profesional {
       'profile_id': profileId,
       'servicio_id': servicioId,
       'especialidad': especialidad,
+      'apellido': apellido,
+      'email': email,
+      'telefono': telefono,
+      'descripcion': descripcion,
       'activo': activo,
     };
   }

@@ -42,9 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(AppMessages.logoutGoodbye)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text(AppMessages.logoutGoodbye)));
 
     Navigator.pushReplacementNamed(context, '/login');
   }
@@ -61,25 +61,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Panel de usuario'),
         actions: [
-          IconButton(
-            onPressed: _logout,
-            icon: const Icon(Icons.logout),
-          ),
+          IconButton(onPressed: _logout, icon: const Icon(Icons.logout)),
         ],
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _cargarCitas(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
           final citas = snapshot.data ?? [];
@@ -148,10 +141,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: const Text('Perfil'),
                     ),
                     OutlinedButton.icon(
-                      onPressed: () => Navigator.pushNamed(
-                        context,
-                        '/notificaciones',
-                      ),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/notificaciones'),
                       icon: const Icon(Icons.notifications_none),
                       label: const Text('Notificaciones'),
                     ),
@@ -176,8 +167,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListTile(
                         leading: const Icon(Icons.calendar_month),
                         title: Text('${cita['fecha']} - ${cita['hora']}'),
-                        subtitle: Text(cita['motivo']?.toString() ?? 'Sin motivo'),
-                        trailing: Text(cita['estado']?.toString() ?? 'pendiente'),
+                        subtitle: Text(
+                          cita['motivo']?.toString() ?? 'Sin motivo',
+                        ),
+                        trailing: Text(
+                          cita['estado']?.toString() ?? 'pendiente',
+                        ),
                       ),
                     ),
                   ),

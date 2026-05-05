@@ -23,6 +23,9 @@ class _ConfirmCitaScreenState extends State<ConfirmCitaScreen> {
         hora: cita['hora'].toString(),
         motivo: cita['motivo'].toString(),
         profesionalId: cita['profesionalId']?.toString(),
+        detalles: cita['detalles']?.toString() ?? '',
+        ubicacion: cita['ubicacion']?.toString() ?? '',
+        instrucciones: cita['instrucciones']?.toString() ?? '',
       );
 
       if (!mounted) return;
@@ -39,9 +42,9 @@ class _ConfirmCitaScreenState extends State<ConfirmCitaScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al confirmar: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al confirmar: $e')));
     }
 
     if (!mounted) return;
@@ -50,12 +53,11 @@ class _ConfirmCitaScreenState extends State<ConfirmCitaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cita = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final cita =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Confirmar cita'),
-      ),
+      appBar: AppBar(title: const Text('Confirmar cita')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Card(

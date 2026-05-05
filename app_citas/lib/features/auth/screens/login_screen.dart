@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/utils/app_messages.dart';
 import '../services/auth_service.dart';
@@ -24,6 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nombreController = TextEditingController();
+  final _apellidoController = TextEditingController();
+  final _telefonoController = TextEditingController();
   final AuthService _authService = AuthService();
 
   bool _loading = false;
@@ -40,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
-      await _authService.recuperarContrasena(email);
+      await _authService.forgotPassword(email);
 
       if (!mounted) return;
 
@@ -51,13 +53,9 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       );
-    } on AuthException catch (e) {
-      setState(() {
-        _error = e.message;
-      });
     } catch (e) {
       setState(() {
-        _error = 'Error inesperado: $e';
+        _error = e.toString();
       });
     }
   }
@@ -102,13 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
       ).showSnackBar(const SnackBar(content: Text(AppMessages.loginSuccess)));
 
       Navigator.pushReplacementNamed(context, '/home');
-    } on AuthException catch (e) {
-      setState(() {
-        _error = e.message;
-      });
     } catch (e) {
       setState(() {
-        _error = 'Error inesperado: $e';
+        _error = e.toString();
       });
     }
 
@@ -118,6 +112,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _register() async {
+    if (_nombreController.text.trim().isEmpty ||
+        _apellidoController.text.trim().isEmpty ||
+        _telefonoController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      setState(() {
+        _error = 'Completa nombre, apellido, telefono, correo y contrasena.';
+      });
+      return;
+    }
+
     setState(() {
       _loading = true;
       _error = null;
@@ -125,8 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await _authService.register(
+        nombre: _nombreController.text.trim(),
+        apellido: _apellidoController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
+        telefono: _telefonoController.text.trim(),
       );
 
       if (!mounted) return;
@@ -134,19 +142,27 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text(AppMessages.userRegistered)));
-    } on AuthException catch (e) {
-      setState(() {
-        _error = e.message;
-      });
+
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       setState(() {
-        _error = 'Error inesperado: $e';
+        _error = e.toString();
       });
     }
 
     setState(() {
       _loading = false;
     });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nombreController.dispose();
+    _apellidoController.dispose();
+    _telefonoController.dispose();
+    super.dispose();
   }
 
   @override
@@ -195,6 +211,44 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const _LoginHeader(),
                       SizedBox(height: isMobile ? 26 : 30),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _nombreController,
+                              textCapitalization: TextCapitalization.words,
+                              style: GoogleFonts.dmSans(color: _darkText),
+                              decoration: _inputDecoration(
+                                label: 'Nombre',
+                                icon: Icons.person_outline,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: _apellidoController,
+                              textCapitalization: TextCapitalization.words,
+                              style: GoogleFonts.dmSans(color: _darkText),
+                              decoration: _inputDecoration(
+                                label: 'Apellido',
+                                icon: Icons.badge_outlined,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _telefonoController,
+                        keyboardType: TextInputType.phone,
+                        style: GoogleFonts.dmSans(color: _darkText),
+                        decoration: _inputDecoration(
+                          label: 'Telefono',
+                          icon: Icons.phone_outlined,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
