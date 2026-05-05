@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { AppointmentStatus } from '../common/enums/appointment-status.enum';
 import { Appointment } from '../appointments/entities/appointment.entity';
+import { ProfessionalSchedule } from '../professional-schedules/entities/professional-schedule.entity';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { Professional } from './entities/professional.entity';
@@ -18,6 +19,8 @@ export class ProfessionalsService {
     private readonly professionalsRepository: Repository<Professional>,
     @InjectRepository(Appointment)
     private readonly appointmentsRepository: Repository<Appointment>,
+    @InjectRepository(ProfessionalSchedule)
+    private readonly schedulesRepository: Repository<ProfessionalSchedule>,
   ) {}
 
   async create(createProfessionalDto: CreateProfessionalDto) {
@@ -76,6 +79,17 @@ export class ProfessionalsService {
     const professionals = await this.professionalsRepository.find({
       where: { activo: true },
     });
+    const diaSemana = this.getDiaSemana(fecha);
+    const availableSchedules = await this.schedulesRepository
+      .createQueryBuilder('schedule')
+      .where('schedule.activo = :activo', { activo: true })
+      .andWhere('schedule.diaSemana = :diaSemana', { diaSemana })
+      .andWhere('schedule.horaInicio <= :hora', { hora })
+      .andWhere('schedule.horaFin > :hora', { hora })
+      .getMany();
+    const scheduledIds = new Set(
+      availableSchedules.map((schedule) => schedule.professionalId),
+    );
     const unavailableAppointments = await this.appointmentsRepository.find({
       where: [
         { fecha, hora, estado: AppointmentStatus.PENDING },
@@ -86,7 +100,14 @@ export class ProfessionalsService {
       unavailableAppointments.map((appointment) => appointment.professionalId),
     );
     return professionals.filter(
-      (professional) => !unavailableIds.has(professional.id),
+      (professional) =>
+        scheduledIds.has(professional.id) &&
+        !unavailableIds.has(professional.id),
     );
+  }
+
+  private getDiaSemana(fecha: string): number {
+    const [year, month, day] = fecha.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
   }
 }

@@ -1,4 +1,6 @@
+// UI REFINED — visual only
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/app_messages.dart';
 import '../models/notificacion.dart';
@@ -12,6 +14,14 @@ class NotificacionesScreen extends StatefulWidget {
 }
 
 class _NotificacionesScreenState extends State<NotificacionesScreen> {
+  static const Color _primary = Color(0xFF004B87);
+  static const Color _secondary = Color(0xFF0073B7);
+  static const Color _background = Color(0xFFF0F5FA);
+  static const Color _surface = Color(0xFFFFFFFF);
+  static const Color _textDark = Color(0xFF333333);
+  static const Color _textLight = Color(0xFF666666);
+  static const Color _border = Color(0xFFD4E5F0);
+
   final NotificacionService _notificacionService = NotificacionService();
 
   bool _prefEmail = true;
@@ -65,7 +75,19 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notificaciones')),
+      backgroundColor: _background,
+      appBar: AppBar(
+        title: Text(
+          'Notificaciones',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: _primary,
+        foregroundColor: Colors.white,
+      ),
       body: FutureBuilder<List<Notificacion>>(
         future: _cargarNotificaciones(),
         builder: (context, snapshot) {
@@ -82,34 +104,70 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              const Text(
-                'Preferencias de notificacion',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              _SectionHeader(label: 'Preferencias de notificacion'),
               const SizedBox(height: 8),
-              Card(
+              Container(
+                decoration: _cardDecoration(radius: 16),
                 child: Column(
                   children: [
                     SwitchListTile(
+                      activeThumbColor: _secondary,
                       value: _prefEmail,
                       onChanged: (value) => setState(() => _prefEmail = value),
-                      title: const Text('Correo electronico'),
+                      title: Text(
+                        'Correo electronico',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          color: _textDark,
+                        ),
+                      ),
                     ),
+                    const Divider(height: 1, color: _border),
                     SwitchListTile(
+                      activeThumbColor: _secondary,
                       value: _prefSms,
                       onChanged: (value) => setState(() => _prefSms = value),
-                      title: const Text('SMS'),
+                      title: Text(
+                        'SMS',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          color: _textDark,
+                        ),
+                      ),
                     ),
+                    const Divider(height: 1, color: _border),
                     SwitchListTile(
+                      activeThumbColor: _secondary,
                       value: _prefPush,
                       onChanged: (value) => setState(() => _prefPush = value),
-                      title: const Text('Push en la app'),
+                      title: Text(
+                        'Push en la app',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          color: _textDark,
+                        ),
+                      ),
                     ),
                     ListTile(
-                      title: const Text('Recordatorio previo'),
-                      subtitle: Text('$_recordatorioMinutos minutos antes'),
+                      title: Text(
+                        'Recordatorio previo',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: _textDark,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '$_recordatorioMinutos minutos antes',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 13,
+                          color: _textLight,
+                        ),
+                      ),
                     ),
                     Slider(
+                      activeColor: _primary,
+                      inactiveColor: _border,
                       value: _recordatorioMinutos.toDouble(),
                       min: 15,
                       max: 1440,
@@ -128,35 +186,102 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
                               onPressed: _guardarPreferencias,
                               icon: const Icon(Icons.save_outlined),
                               label: const Text('Guardar preferencias'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                textStyle: GoogleFonts.dmSans(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Bandeja de notificaciones',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              _SectionHeader(label: 'Bandeja de notificaciones'),
               const SizedBox(height: 8),
               if (notificaciones.isEmpty)
-                const Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text('No tienes notificaciones.'),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: _cardDecoration(radius: 12),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.notifications_none,
+                        color: _secondary,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No tienes notificaciones.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 15,
+                          color: _textLight,
+                        ),
+                      ),
+                    ],
                   ),
                 )
               else
                 ...notificaciones.map(
-                  (notificacion) => Card(
-                    child: ListTile(
-                      leading: Icon(
-                        notificacion.leida == true
-                            ? Icons.notifications_none
-                            : Icons.notifications_active,
+                  (notificacion) => Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: notificacion.leida == true
+                          ? _surface
+                          : _background,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border(
+                        left: BorderSide(
+                          color: notificacion.leida == true
+                              ? Colors.transparent
+                              : _secondary,
+                          width: 3,
+                        ),
                       ),
-                      title: Text(notificacion.titulo),
-                      subtitle: Text(notificacion.mensaje),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      leading: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: const Color(0xFFE8F4FD),
+                        child: Icon(
+                          notificacion.leida == true
+                              ? Icons.notifications_none
+                              : Icons.notifications_active,
+                          color: _secondary,
+                          size: 18,
+                        ),
+                      ),
+                      title: Text(
+                        notificacion.titulo,
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: _textDark,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          notificacion.mensaje,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 13,
+                            color: _textLight,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
                       onTap: () async {
                         await _notificacionService.marcarComoLeida(
                           notificacion.id,
@@ -172,6 +297,39 @@ class _NotificacionesScreenState extends State<NotificacionesScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  static BoxDecoration _cardDecoration({required double radius}) {
+    return BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(radius),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x0A004B87),
+          blurRadius: 12,
+          offset: Offset(0, 4),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label.toUpperCase(),
+      style: GoogleFonts.dmSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
+        color: _NotificacionesScreenState._textLight,
+        letterSpacing: 0.8,
       ),
     );
   }

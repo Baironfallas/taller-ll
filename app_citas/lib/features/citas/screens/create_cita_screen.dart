@@ -1,4 +1,6 @@
+// UI REFINED — visual only
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../profesionales/models/profesional.dart';
 import '../../profesionales/services/profesional_service.dart';
@@ -11,6 +13,14 @@ class CreateCitaScreen extends StatefulWidget {
 }
 
 class _CreateCitaScreenState extends State<CreateCitaScreen> {
+  static const Color _primary = Color(0xFF004B87);
+  static const Color _secondary = Color(0xFF0073B7);
+  static const Color _background = Color(0xFFF0F5FA);
+  static const Color _surface = Color(0xFFFFFFFF);
+  static const Color _textDark = Color(0xFF333333);
+  static const Color _textLight = Color(0xFF666666);
+  static const Color _border = Color(0xFFD4E5F0);
+
   final _motivoController = TextEditingController();
   final _detallesController = TextEditingController();
 
@@ -122,16 +132,35 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Programacion de citas')),
+      backgroundColor: _background,
+      appBar: AppBar(
+        title: Text(
+          'Programacion de citas',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: _primary,
+        foregroundColor: Colors.white,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text(
+          _ProgressBar(value: 0.62),
+          const SizedBox(height: 24),
+          Text(
             'Selecciona fecha y hora',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: _primary,
+            ),
           ),
-          const SizedBox(height: 10),
-          Card(
+          const SizedBox(height: 16),
+          Container(
+            decoration: _cardDecoration(),
             child: CalendarDatePicker(
               initialDate: _fechaSeleccionada,
               firstDate: DateTime.now(),
@@ -142,12 +171,11 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
               },
             ),
           ),
-          const SizedBox(height: 8),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.access_time),
-            title: const Text('Hora de la cita'),
-            subtitle: Text(_horaSeleccionada.format(context)),
+          const SizedBox(height: 16),
+          _PickerField(
+            icon: Icons.access_time,
+            label: 'Hora de la cita',
+            value: _horaSeleccionada.format(context),
             onTap: () async {
               final seleccion = await showTimePicker(
                 context: context,
@@ -159,24 +187,30 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
               _cargarProfesionalesDisponibles();
             },
           ),
-          const SizedBox(height: 12),
-          const Text(
+          const SizedBox(height: 16),
+          const Divider(height: 1, thickness: 0.5, color: _border),
+          const SizedBox(height: 16),
+          Text(
             'Profesionales disponibles',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: GoogleFonts.dmSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: _textLight,
+              letterSpacing: 0.8,
+            ),
           ),
           const SizedBox(height: 8),
           if (_loadingProfesionales)
             const Center(child: CircularProgressIndicator())
           else if (_profesionalesDisponibles.isEmpty)
-            const Text(
+            Text(
               'No hay profesionales disponibles para la fecha seleccionada.',
+              style: GoogleFonts.dmSans(fontSize: 14, color: _textLight),
             )
           else
             DropdownButtonFormField<String>(
               initialValue: _profesionalSeleccionado?.id,
-              decoration: const InputDecoration(
-                labelText: 'Selecciona un profesional',
-              ),
+              decoration: _inputDecoration('Selecciona un profesional'),
               items: _profesionalesDisponibles
                   .map(
                     (prof) => DropdownMenuItem<String>(
@@ -185,6 +219,10 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
                         prof.especialidad == null || prof.especialidad!.isEmpty
                             ? prof.nombre
                             : '${prof.nombre} - ${prof.especialidad}',
+                        style: GoogleFonts.dmSans(
+                          fontSize: 14,
+                          color: _textDark,
+                        ),
                       ),
                     ),
                   )
@@ -199,30 +237,130 @@ class _CreateCitaScreenState extends State<CreateCitaScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _motivoController,
-            decoration: const InputDecoration(
-              labelText: 'Motivo de la cita',
-              border: OutlineInputBorder(),
-            ),
+            style: GoogleFonts.dmSans(fontSize: 14, color: _textDark),
+            decoration: _inputDecoration('Motivo de la cita'),
             maxLines: 2,
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _detallesController,
-            decoration: const InputDecoration(
-              labelText: 'Detalles adicionales',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
+            style: GoogleFonts.dmSans(fontSize: 14, color: _textDark),
+            decoration: _inputDecoration('Detalles adicionales'),
+            maxLines: 4,
           ),
           const SizedBox(height: 20),
           _loading
               ? const Center(child: CircularProgressIndicator())
-              : ElevatedButton.icon(
-                  onPressed: _continuarAConfirmacion,
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Continuar a confirmacion'),
+              : SizedBox(
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: _continuarAConfirmacion,
+                    icon: const Icon(Icons.arrow_forward),
+                    label: Text(
+                      'Continuar a confirmacion',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ),
         ],
+      ),
+    );
+  }
+
+  static BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x0A004B87),
+          blurRadius: 12,
+          offset: Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  static InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.dmSans(fontSize: 14, color: _textLight),
+      filled: true,
+      fillColor: _surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: _border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: _secondary, width: 1.5),
+      ),
+    );
+  }
+}
+
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.value});
+
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(2),
+      child: LinearProgressIndicator(
+        minHeight: 4,
+        value: value,
+        backgroundColor: _CreateCitaScreenState._border,
+        valueColor: const AlwaysStoppedAnimation<Color>(
+          _CreateCitaScreenState._primary,
+        ),
+      ),
+    );
+  }
+}
+
+class _PickerField extends StatelessWidget {
+  const _PickerField({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: InputDecorator(
+        decoration: _CreateCitaScreenState._inputDecoration(label).copyWith(
+          prefixIcon: Icon(icon, color: _CreateCitaScreenState._secondary),
+        ),
+        child: Text(
+          value,
+          style: GoogleFonts.dmSans(
+            fontSize: 14,
+            color: _CreateCitaScreenState._textDark,
+          ),
+        ),
       ),
     );
   }

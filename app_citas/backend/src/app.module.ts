@@ -8,6 +8,7 @@ import { ProfessionalsModule } from './professionals/professionals.module';
 import { AppointmentsModule } from './appointments/appointments.module';
 import { NotificationPreferencesModule } from './notification-preferences/notification-preferences.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SeederModule } from './seed/seeder.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     AppointmentsModule,
     NotificationPreferencesModule,
     NotificationsModule,
+    SeederModule,
   ],
 })
 export class AppModule {}
