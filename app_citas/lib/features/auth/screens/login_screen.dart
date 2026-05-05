@@ -1,3 +1,4 @@
+// UI REFINED — visual only
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -173,14 +174,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: _clinicWhite,
       appBar: AppBar(
-        title: Text(
-          'Registro / Inicio de sesion',
-          style: GoogleFonts.dmSans(fontWeight: FontWeight.w700),
-        ),
-        backgroundColor: _clinicWhite,
+        title: const SizedBox.shrink(),
+        backgroundColor: Colors.transparent,
         foregroundColor: _primaryBlue,
         elevation: 0,
-        centerTitle: true,
       ),
       body: SafeArea(
         child: Center(
@@ -194,13 +191,12 @@ class _LoginScreenState extends State<LoginScreen> {
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: _white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: _borderBlue),
-                  boxShadow: [
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: const [
                     BoxShadow(
-                      color: _primaryBlue.withValues(alpha: 0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 14),
+                      color: Color(0x0A004B87),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
@@ -273,7 +269,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (_loading)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Center(child: CircularProgressIndicator()),
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  _primaryBlue,
+                                ),
+                              ),
+                            ),
+                          ),
                         )
                       else ...[
                         SizedBox(
@@ -292,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               foregroundColor: _white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
@@ -311,17 +318,32 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: _primaryBlue,
-                              side: const BorderSide(color: _secondaryBlue),
+                              side: const BorderSide(color: _borderBlue),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
                         ),
                       ],
                       const SizedBox(height: 12),
-                      const Divider(color: _borderBlue),
-                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(color: _borderBlue)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Text(
+                              'o continua con',
+                              style: GoogleFonts.dmSans(
+                                fontSize: 13,
+                                color: _lightText,
+                              ),
+                            ),
+                          ),
+                          const Expanded(child: Divider(color: _borderBlue)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
                       Wrap(
                         alignment: WrapAlignment.spaceBetween,
                         spacing: 8,
@@ -369,17 +391,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return InputDecoration(
       labelText: label,
-      labelStyle: GoogleFonts.dmSans(color: _lightText),
+      labelStyle: GoogleFonts.dmSans(fontSize: 14, color: _lightText),
       prefixIcon: Icon(icon, color: _secondaryBlue),
       filled: true,
-      fillColor: _clinicWhite,
+      fillColor: _white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: _borderBlue),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: _secondaryBlue, width: 1.5),
       ),
     );
@@ -388,7 +410,7 @@ class _LoginScreenState extends State<LoginScreen> {
   static ButtonStyle _linkStyle() {
     return TextButton.styleFrom(
       foregroundColor: _secondaryBlue,
-      textStyle: GoogleFonts.dmSans(fontWeight: FontWeight.w700),
+      textStyle: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w500),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     );
   }
@@ -421,7 +443,7 @@ class _LoginHeader extends StatelessWidget {
           'Accede o crea tu cuenta',
           textAlign: TextAlign.center,
           style: GoogleFonts.playfairDisplay(
-            fontSize: isMobile ? 30 : 34,
+            fontSize: 26,
             fontWeight: FontWeight.w700,
             color: _LoginScreenState._primaryBlue,
             height: 1.15,
@@ -473,7 +495,8 @@ class _ErrorBanner extends StatelessWidget {
               message,
               style: GoogleFonts.dmSans(
                 color: _LoginScreenState._errorRed,
-                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
                 height: 1.35,
               ),
             ),

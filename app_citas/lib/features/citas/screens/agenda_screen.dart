@@ -1,4 +1,6 @@
+// UI REFINED — visual only
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/utils/app_messages.dart';
 import '../services/cita_service.dart';
@@ -11,6 +13,15 @@ class AgendaScreen extends StatefulWidget {
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
+  static const Color _primary = Color(0xFF004B87);
+  static const Color _secondary = Color(0xFF0073B7);
+  static const Color _background = Color(0xFFF0F5FA);
+  static const Color _surface = Color(0xFFFFFFFF);
+  static const Color _textDark = Color(0xFF333333);
+  static const Color _textLight = Color(0xFF666666);
+  static const Color _border = Color(0xFFD4E5F0);
+  static const Color _error = Color(0xFFB42318);
+
   final CitaService _citaService = CitaService();
   final TextEditingController _busquedaController = TextEditingController();
 
@@ -184,18 +195,41 @@ class _AgendaScreenState extends State<AgendaScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Gestion de agenda')),
+      backgroundColor: _background,
+      appBar: AppBar(
+        title: Text(
+          'Gestion de agenda',
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: _primary,
+        foregroundColor: Colors.white,
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Agenda',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: _primary,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 TextField(
                   controller: _busquedaController,
-                  decoration: InputDecoration(
+                  style: GoogleFonts.dmSans(fontSize: 14, color: _textDark),
+                  decoration: _inputDecoration(
                     labelText: 'Buscar por fecha, hora, motivo o estado',
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search, color: _secondary),
                     suffixIcon: _busquedaController.text.isEmpty
                         ? null
                         : IconButton(
@@ -203,7 +237,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                               _busquedaController.clear();
                               setState(() {});
                             },
-                            icon: const Icon(Icons.close),
+                            icon: const Icon(Icons.close, color: _textLight),
                           ),
                   ),
                   onChanged: (_) => setState(() {}),
@@ -211,9 +245,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: _estadoFiltro,
-                  decoration: const InputDecoration(
-                    labelText: 'Filtrar por estado',
-                  ),
+                  decoration: _inputDecoration(labelText: 'Filtrar por estado'),
                   items: const [
                     DropdownMenuItem(value: 'todos', child: Text('Todos')),
                     DropdownMenuItem(
@@ -253,8 +285,14 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 final citas = _filtrarCitas(snapshot.data ?? []);
 
                 if (citas.isEmpty) {
-                  return const Center(
-                    child: Text('No hay citas con los filtros actuales.'),
+                  return Center(
+                    child: Text(
+                      'No hay citas con los filtros actuales.',
+                      style: GoogleFonts.dmSans(
+                        fontSize: 15,
+                        color: _textLight,
+                      ),
+                    ),
                   );
                 }
 
@@ -266,77 +304,102 @@ class _AgendaScreenState extends State<AgendaScreen> {
                     itemBuilder: (context, index) {
                       final cita = citas[index];
 
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.event_note),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      '${cita['fecha']} - ${cita['hora']}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: _cardDecoration(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: Color(0xFFE8F4FD),
+                                  child: Icon(
+                                    Icons.event_note,
+                                    color: _secondary,
                                   ),
-                                  Chip(
-                                    label: Text(
-                                      (cita['estado'] ?? 'pendiente')
-                                          .toString(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(cita['motivo']?.toString() ?? 'Sin motivo'),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () => _mostrarEditor(cita),
-                                    icon: const Icon(Icons.edit),
-                                    label: const Text('Editar'),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  OutlinedButton.icon(
-                                    onPressed: () => _marcarCancelada(cita),
-                                    icon: const Icon(Icons.cancel_outlined),
-                                    label: const Text('Cancelar'),
-                                  ),
-                                  const Spacer(),
-                                  IconButton(
-                                    tooltip: 'Eliminar',
-                                    onPressed: () async {
-                                      await _citaService.eliminarCita(
-                                        cita['id'].toString(),
-                                      );
-
-                                      if (!mounted) return;
-
-                                      ScaffoldMessenger.of(
-                                        this.context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Cita eliminada'),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${cita['fecha']} - ${cita['hora']}',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: _textDark,
                                         ),
-                                      );
-
-                                      setState(() {});
-                                    },
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        cita['motivo']?.toString() ??
+                                            'Sin motivo',
+                                        style: GoogleFonts.dmSans(
+                                          fontSize: 12,
+                                          color: _textLight,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                                _StatusChip(
+                                  estado: (cita['estado'] ?? 'pendiente')
+                                      .toString(),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: () => _mostrarEditor(cita),
+                                  icon: const Icon(Icons.edit, size: 18),
+                                  label: const Text('Editar'),
+                                  style: _slotButtonStyle(),
+                                ),
+                                OutlinedButton.icon(
+                                  onPressed: () => _marcarCancelada(cita),
+                                  icon: const Icon(
+                                    Icons.cancel_outlined,
+                                    size: 18,
+                                  ),
+                                  label: const Text('Cancelar'),
+                                  style: _slotButtonStyle(),
+                                ),
+                                IconButton(
+                                  tooltip: 'Eliminar',
+                                  onPressed: () async {
+                                    await _citaService.eliminarCita(
+                                      cita['id'].toString(),
+                                    );
+
+                                    if (!mounted) return;
+
+                                    ScaffoldMessenger.of(
+                                      this.context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Cita eliminada'),
+                                      ),
+                                    );
+
+                                    setState(() {});
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: _error,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -346,14 +409,102 @@ class _AgendaScreenState extends State<AgendaScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 8),
             child: Text(
               AppMessages.citaConfirmed,
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: GoogleFonts.dmSans(fontSize: 12, color: _textLight),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  static InputDecoration _inputDecoration({
+    required String labelText,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: GoogleFonts.dmSans(fontSize: 14, color: _textLight),
+      prefixIcon: prefixIcon,
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: _surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: _border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: _secondary, width: 1.5),
+      ),
+    );
+  }
+
+  static BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: _surface,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x0A004B87),
+          blurRadius: 12,
+          offset: Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  static ButtonStyle _slotButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: _primary,
+      side: const BorderSide(color: _border),
+      textStyle: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w500),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.estado});
+
+  final String estado;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalized = estado.toLowerCase();
+    final Color background;
+    final Color foreground;
+
+    if (normalized == 'confirmada' || normalized == 'confirmed') {
+      background = const Color(0xFFE8F4FD);
+      foreground = _AgendaScreenState._secondary;
+    } else if (normalized == 'cancelada' || normalized == 'cancelled') {
+      background = const Color(0xFFFFEBEB);
+      foreground = _AgendaScreenState._error;
+    } else {
+      background = const Color(0xFFFFF8E1);
+      foreground = const Color(0xFFB07D00);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        estado,
+        style: GoogleFonts.dmSans(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: foreground,
+        ),
       ),
     );
   }
