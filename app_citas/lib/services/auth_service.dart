@@ -16,7 +16,7 @@ class AuthService {
     required String apellido,
     required String email,
     required String password,
-    required String telefono,
+    String? telefono,
   }) async {
     await _apiClient.post(
       '/auth/register',
@@ -25,7 +25,8 @@ class AuthService {
         'apellido': apellido,
         'email': email,
         'password': password,
-        'telefono': telefono,
+        // El backend actual sigue requiriendo telefono en el payload.
+        'telefono': telefono ?? 'No registrado',
       },
     );
 

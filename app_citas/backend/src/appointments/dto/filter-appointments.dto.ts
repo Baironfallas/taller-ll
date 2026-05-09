@@ -5,8 +5,9 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { AppointmentStatus } from '../../common/enums/appointment-status.enum';
+import { trimToUndefined } from '../../common/utils/string-transform.util';
 
 export class FilterAppointmentsDto {
   @IsOptional()
@@ -36,6 +37,7 @@ export class FilterAppointmentsDto {
   fechaFin?: string;
 
   @IsOptional()
+  @Transform(trimToUndefined)
   @IsString()
   texto?: string;
 }

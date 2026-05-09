@@ -18,7 +18,7 @@ export class NotificationsService {
   async create(createNotificationDto: CreateNotificationDto) {
     await this.usersService.findEntityById(createNotificationDto.userId);
     if (createNotificationDto.appointmentId) {
-      await this.appointmentsService.findOne(
+      await this.appointmentsService.findEntityById(
         createNotificationDto.appointmentId,
       );
     }

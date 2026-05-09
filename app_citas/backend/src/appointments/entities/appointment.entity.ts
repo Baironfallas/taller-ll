@@ -41,11 +41,23 @@ export class Appointment {
   })
   estado: AppointmentStatus;
 
+  @Column({ type: 'date', nullable: true })
+  fechaAnterior: string | null;
+
+  @Column({ type: 'time', nullable: true })
+  horaAnterior: string | null;
+
   @Column({ length: 180 })
   ubicacion: string;
 
   @Column({ type: 'text' })
   instrucciones: string;
+
+  @Column({ type: 'text', nullable: true })
+  motivoCancelacion: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  motivoRechazo: string | null;
 
   @CreateDateColumn()
   createdAt: Date;
